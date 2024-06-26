@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .menu-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .menu-item {
+            width: 200px;
+            margin: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .menu-item img {
+            max-width: 100%;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        .menu-item button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .menu-item button:hover {
+            background-color: #0056b3;
+        }
+        .view-cart {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .view-cart button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .view-cart button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+    <div class="menu-item" data-name="Kota 4" data-price="35">
+        <h2>Kota 4</h2>
+        <p>Basic + palony + Cheese + egg + burger + vianna</p>
+        <p>R35.00</p>
+        <button onclick="addToCart(this)">Add to Cart</button>
+    </div>
+    <div class="menu-item" data-name="Kota 5" data-price="45">
+        <h2>Kota 5</h2>
+        <p>Basic + palony + Cheese + egg + burger + vianna + Russian</p>
+        <p>R45.00</p>
+        <button onclick="addToCart(this)">Add to Cart</button>
+    </div>
+    <div class="menu-item" data-name="Queen Kota" data-price="55">
+        <h2>Queen Kota</h2>
+        <p>Basics + palony + Double Cheese + eggs + Double beef patty + Vianna + Burger</p>
+        <p>R55.00</p>
+        <button onclick="addToCart(this)">Add to Cart</button>
+    </div>
+    </div>
+    <div class="view-cart">
+        <button onclick="viewCart()">View Cart</button>
+    </div>
+    <script>
+        function addToCart(button) {
+            const menuItem = button.parentElement;
+            const name = menuItem.getAttribute('data-name');
+            const price = parseFloat(menuItem.getAttribute('data-price'));
+            
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            
+            // Check if the item already exists in the cart
+            const existingItemIndex = cartItems.findIndex(item => item.name === name);
+            if (existingItemIndex > -1) {
+                cartItems[existingItemIndex].quantity += 1;
+            } else {
+                cartItems.push({ name, price, quantity: 1 });
+            }
+            
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            
+            alert(`${name} has been added to your cart.`);
+        }
+
+        function viewCart() {
+            window.location.href = 'cart.html';  // Make sure this matches the path to your cart page
+        }
+    </script>
+</body>
+</html>

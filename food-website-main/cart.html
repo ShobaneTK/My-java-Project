@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #be8812;
+        }
+        .container {
+            display: flex;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .products, .payment {
+            padding: 20px;
+            width: 50%;
+        }
+        .products {
+            border-right: 1px solid #ddd;
+        }
+        .product {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .product-info {
+            flex: 1;
+            margin-left: 10px;
+        }
+        .product-controls {
+            display: flex;
+            align-items: center;
+        }
+        .product-controls button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            background-color: #ffc506;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+        .product-controls button:hover {
+            background-color: #8a8b42;
+        }
+        .remove {
+            background-color: #7c2b33;
+        }
+        .remove:hover {
+            background-color: #c82333;
+        }
+        .total, .discount {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .payment input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .payment button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ffc506;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .payment button:hover {
+            background-color: #8a8b42;
+        }
+        .back-to-menu {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-to-menu button {
+            background-color: #ffc506;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .back-to-menu button:hover {
+            background-color: #8a8b42;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="products">
+            <h2>Your Products</h2>
+            <div id="product-list"></div>
+            <div class="total">
+                <div>Total:</div>
+                <div id="total">R0.00</div>
+            </div>
+            <div class="back-to-menu">
+                <button onclick="backToMenu()">Back to Menu</button>
+            </div>
+        </div>
+        <div class="payment">
+            <h2>Please fill the form before cashing out</h2>
+            <input type="text" placeholder="Enter your name" id="customer-name" required>
+            <input type="text" placeholder="Enter Address for delivery" id="address-location" required>
+            <input type="text" placeholder="Enter your Phone number" id="phone-number" required>
+            <button id="buy-now">Cash out</button>
+        </div>
+    </div>
+    
+    <script>
+        function loadCart() {
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = ''; // Clear existing items
+            let total = 0;
+            
+            cartItems.forEach((item, index) => {
+                const productDiv = document.createElement('div');
+                productDiv.className = 'product';
+                productDiv.innerHTML = `
+                    <div class="product-info">
+                        <div>${item.name}</div>
+                        <div>R${item.price}</div>
+                    </div>
+                    <div class="product-controls">
+                        <button onclick="decreaseQuantity(${index})">-</button>
+                        <span id="quantity-${index}">${item.quantity}</span>
+                        <button onclick="increaseQuantity(${index})">+</button>
+                        <button class="remove" onclick="removeItem(${index})">Remove</button>
+                    </div>
+                `;
+                productList.appendChild(productDiv);
+                total += item.price * item.quantity;
+            });
+            
+            document.getElementById('total').innerText = `R${total.toFixed(2)}`;
+        }
+
+        function updateCart(cartItems) {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            loadCart();
+        }
+
+        function increaseQuantity(index) {
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            cartItems[index].quantity++;
+            updateCart(cartItems);
+        }
+
+        function decreaseQuantity(index) {
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            if (cartItems[index].quantity > 1) {
+                cartItems[index].quantity--;
+                updateCart(cartItems);
+            } else {
+                removeItem(index);
+            }
+        }
+
+        function removeItem(index) {
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            cartItems.splice(index, 1);
+            updateCart(cartItems);
+        }
+
+        function backToMenu() {
+            window.location.href = 'shoping.html'; // Make sure this matches the path to your menu page
+        }
+
+        document.getElementById('buy-now').addEventListener('click', () => {
+            const name = document.getElementById('customer-name').value;
+            const address = document.getElementById('address-location').value;
+            const phone = document.getElementById('phone-number').value;
+
+            if (!name || !address || !phone) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+            const order = {
+                customer: {
+                    name,
+                    address,
+                    phone
+                },
+                items: cartItems,
+                total: document.getElementById('total').innerText
+            };
+
+            fetch('http://your-backend-server.com/orders', { // Replace with your backend server URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(order)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Order placed successfully!');
+                localStorage.removeItem('cartItems');
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error placing your order. Please try again.');
+            });
+        });
+
+        loadCart();
+    </script>
+</body>
+</html>
